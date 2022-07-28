@@ -24,4 +24,7 @@ var RegisterMovieRoutes = func(router *mux.Router) {
 	s.Use(auth.JwtVerify)
 	s.HandleFunc("/user", controllers.ListUsers).Methods("GET")
 	s.HandleFunc("/user/{userId}", controllers.GetUser).Methods("GET")
+	s.HandleFunc("/user/{userId}/movie/{movieId}/togglefavorite", controllers.ToggleFavorite).Methods("POST")
+	s.HandleFunc("/user/{userId}/favorites", controllers.ShowFavorites).Methods("GET")
+	s.HandleFunc("/user/{userId}/favorites", controllers.DeleteFavorites).Methods("DELETE")
 }

@@ -141,3 +141,37 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 
 }
+
+func ToggleFavorite(w http.ResponseWriter, r *http.Request) {
+	userResponse := utils.UserResponse{}
+
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	movieId := vars["movieId"]
+
+	userID, userErr := strconv.ParseInt(userId, 0, 0)
+	movieID, movieErr := strconv.ParseInt(movieId, 0, 0)
+
+	if userErr != nil || movieErr != nil {
+		fmt.Print("Error parsing id values")
+	}
+	favorite, favoriteError := models.ToggleFavorite(userID, movieID)
+
+	if favoriteError != nil {
+		userResponse.Err = favoriteError.Error()
+	} else {
+		userResponse.Data = favorite
+		userResponse.Err = "nil"
+	}
+	res, _ := json.Marshal(userResponse)
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+}
+
+func ShowFavorites(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func DeleteFavorites(w http.ResponseWriter, r *http.Request) {
+
+}

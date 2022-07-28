@@ -14,6 +14,8 @@ import (
 func main() {
 	db := database.Init()
 	db.AutoMigrate(&models.Movie{}, &models.User{}, &models.Favorite{})
+	// db.Model(&models.Favorite{}).AddForeignKey("user_id", "users(id)", "cascade", "cascade")
+	// db.Model(&models.Favorite{}).AddForeignKey("movie_id", "movies(id)", "cascade", "cascade")
 
 	r := mux.NewRouter()
 	routes.RegisterMovieRoutes(r)

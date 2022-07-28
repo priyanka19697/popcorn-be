@@ -6,8 +6,7 @@ import (
 
 type Favorite struct {
 	gorm.Model
-	Name    string
-	UserId  uint   `gorm:"foreignkey:UserId"`
-	Movie   *Movie `gorm:"foreignkey:MovieId"`
-	MovieId uint
+	UserID  uint
+	Movie   Movie `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	MovieID uint
 }
