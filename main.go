@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -17,6 +18,10 @@ func main() {
 	r := mux.NewRouter()
 	routes.RegisterMovieRoutes(r)
 	http.Handle("/", r)
-	http.ListenAndServe("localhost:9010", r)
+	err := http.ListenAndServe("localhost:9010", r)
+
+	if err != nil {
+		fmt.Println(err, "problem serving")
+	}
 
 }

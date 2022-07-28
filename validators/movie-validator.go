@@ -1,6 +1,7 @@
 package validators
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-playground/validator"
@@ -13,7 +14,7 @@ var validate *validator.Validate
 func CreateMovieValidator(r *http.Request) (models.Movie, error) {
 	m := &models.Movie{}
 	utils.ParseBody(r, m)
-
+	fmt.Printf("%+v", m)
 	validate = validator.New()
 	err := validate.Struct(m)
 

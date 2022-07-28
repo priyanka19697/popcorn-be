@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/jinzhu/gorm"
 	"github.com/priyanka19697/popcorn-be/database"
@@ -9,13 +10,13 @@ import (
 
 type Movie struct {
 	gorm.Model
-	Title       string  `json:"title" validate:"required" gorm:"unique"`
-	Year        string  `json:"year" validate:"required"`
-	Rating      float32 `json:"rating" gorm:"default: 0.0"`
-	Url         string  `json:"url" validate:"required"`
-	Description string  `json:"description" validate:"required"`
-	Type        string  `json:"type" validate:"required"`
-	PosterURL   string  `json:"posterURL"`
+	Title       string    `json:"title" validate:"required" gorm:"unique"`
+	Year        time.Time `json:"year" validate:"required" gorm:"type:datetime"`
+	Rating      float32   `json:"rating" gorm:"default: 0.0"`
+	Url         string    `json:"url" validate:"required"`
+	Description string    `json:"description" validate:"required"`
+	Type        string    `json:"type" validate:"required"`
+	PosterURL   string    `json:"posterURL"`
 }
 
 func CreateMovie(movie Movie) error {
@@ -29,7 +30,6 @@ func GetAllMovies() ([]Movie, error) {
 	var Movies []Movie
 
 	result := db.Find(&Movies)
-
 	if result.Error != nil {
 		return nil, fmt.Errorf("there was a problem fetching data in GetAllMovies")
 	}
@@ -37,11 +37,11 @@ func GetAllMovies() ([]Movie, error) {
 	return Movies, nil
 }
 
-func GetMovieById(Id int64) (*Movie, *gorm.DB) {
+func GetMovieById(Id int64) (*Movie, error) {
 	db := database.GetDB()
 	var getMovie Movie
-	db.Where("ID=?", Id).Find(&getMovie)
-	return &getMovie, db
+	result := db.Where("ID=?", Id).Find(&getMovie)
+	return &getMovie, result.Error
 }
 
 func GetMovieByTitle(name string) (*Movie, *gorm.DB) {
@@ -56,4 +56,28 @@ func DeleteMovie(Id int64) Movie {
 	var movie Movie
 	db.Where("ID= ?", Id).Delete(movie)
 	return movie
+}
+
+func UpdateMovie(Id int64, movie Movie) (Movie, error) {
+	db := database.GetDB()
+	var getMovie Movie
+	result := db.Where("ID=?", Id).Find(&getMovie)
+
+	fmt.Printf("%+v to be updated with", movie)
+	fmt.Printf("%v %v", result, result.Error)
+
+	if result.Error == nil {
+		getMovie.Title = movie.Title
+		getMovie.Description = movie.Description
+		getMovie.Rating = movie.Rating
+		getMovie.Url = movie.Url
+		getMovie.PosterURL = movie.PosterURL
+		getMovie.Type = movie.Type
+		getMovie.Year = movie.Year
+		getMovie.UpdatedAt = time.Now()
+		db.Save(&getMovie)
+		fmt.Print(getMovie, "record after update")
+		return getMovie, nil
+	}
+	return getMovie, result.Error
 }

@@ -24,3 +24,10 @@ func GetAllUsers() []User {
 	db.Find(&Users)
 	return Users
 }
+
+func GetUser(Id int64) (*User, error) {
+	db := database.GetDB()
+	var getUser User
+	result := db.Where("ID=?", Id).Find(&getUser)
+	return &getUser, result.Error
+}

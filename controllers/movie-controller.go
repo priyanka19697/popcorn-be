@@ -8,6 +8,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/priyanka19697/popcorn-be/models"
+	"github.com/priyanka19697/popcorn-be/utils"
 	"github.com/priyanka19697/popcorn-be/validators"
 )
 
@@ -16,10 +17,13 @@ var NewMovie models.Movie
 func ListMovies(w http.ResponseWriter, r *http.Request) {
 	movies, err := models.GetAllMovies()
 
-	movieResponse := MovieResponse{
-		Data: movies,
-		Err:  err.Error(),
+	var movieResponse utils.MovieResponse
+
+	movieResponse.Data = movies
+	if err != nil {
+		movieResponse.Err = err.Error()
 	}
+	movieResponse.Err = "nil"
 
 	res, _ := json.Marshal(movieResponse)
 	w.WriteHeader(http.StatusOK)
@@ -36,12 +40,33 @@ func GetMovieByTitle(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
+func GetMovieById(w http.ResponseWriter, r *http.Request) {
+	movieResponse := utils.MovieResponse{}
+
+	vars := mux.Vars(r)
+	movieId := vars["movieId"]
+
+	ID, err := strconv.ParseInt(movieId, 0, 0)
+	if err != nil {
+		fmt.Println("parsing error")
+	}
+	movie, err := models.GetMovieById(ID)
+
+	if err != nil {
+		movieResponse.Err = err.Error()
+	} else {
+		movieResponse.Data = movie
+		movieResponse.Err = "nil"
+	}
+	res, _ := json.Marshal(movieResponse)
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+}
+
 func CreateMovie(w http.ResponseWriter, r *http.Request) {
 
-	movieResponse := MovieResponse{}
-
+	movieResponse := utils.MovieResponse{}
 	movie, err := validators.CreateMovieValidator(r)
-
 	if err != nil {
 		fmt.Println("Here error", err)
 		movieResponse.Err = err.Error()
@@ -83,5 +108,24 @@ func DeleteMovie(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateMovie(w http.ResponseWriter, r *http.Request) {
+	movieResponse := utils.MovieResponse{}
+	newMovieData, err := validators.CreateMovieValidator(r)
+	vars := mux.Vars(r)
+	movieId := vars["movieId"]
+	ID, err := strconv.ParseInt(movieId, 0, 0)
+	if err != nil {
+		fmt.Println("parsing error")
+	}
+	movie, err := models.UpdateMovie(ID, newMovieData)
+
+	if err != nil {
+		movieResponse.Err = err.Error()
+	} else {
+		movieResponse.Data = movie
+		movieResponse.Err = "nil"
+	}
+	res, _ := json.Marshal(movieResponse)
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
 
 }
