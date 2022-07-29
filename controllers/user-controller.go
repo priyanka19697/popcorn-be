@@ -169,7 +169,17 @@ func ToggleFavorite(w http.ResponseWriter, r *http.Request) {
 }
 
 func ShowFavorites(w http.ResponseWriter, r *http.Request) {
+	userResponse := utils.UserResponse{}
+	vars := mux.Vars(r)
+	userId := vars["userId"]
+	userID, _ := strconv.ParseInt(userId, 0, 0)
 
+	var favorites []models.Favorite = models.ShowFavorites(userID)
+	userResponse.Data = favorites
+	userResponse.Err = ""
+	res, _ := json.Marshal(userResponse)
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
 }
 
 func DeleteFavorites(w http.ResponseWriter, r *http.Request) {

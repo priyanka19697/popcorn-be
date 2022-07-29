@@ -37,11 +37,11 @@ func GetAllMovies() ([]Movie, error) {
 	return Movies, nil
 }
 
-func GetMovieById(Id int64) (*Movie, error) {
+func GetMovieById(Id int64) (Movie, error) {
 	db := database.GetDB()
-	var getMovie Movie
-	result := db.Where("ID=?", Id).Find(&getMovie)
-	return &getMovie, result.Error
+	var movie Movie
+	result := db.Where("ID=?", Id).Find(&movie)
+	return movie, result.Error
 }
 
 func GetMovieByTitle(name string) (*Movie, *gorm.DB) {

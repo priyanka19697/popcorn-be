@@ -1,6 +1,9 @@
 package models
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/jinzhu/gorm"
 	"github.com/priyanka19697/popcorn-be/database"
 )
@@ -10,7 +13,7 @@ type User struct {
 	Name      string     `json:"username"`
 	Email     string     `gorm:"type:varchar(100);unique_index" json:"email"`
 	Password  string     `json:"password"`
-	favorites []Favorite `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Favorites []Favorite `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 func CreateUser(user User) error {
@@ -22,28 +25,53 @@ func CreateUser(user User) error {
 func GetAllUsers() []User {
 	db := database.GetDB()
 	var Users []User
-	db.Find(&Users)
+	// db.Find(&Users)
+	db.Model(&User{}).Preload("Favorites").Find(&Users)
 	return Users
 }
 
-func GetUser(Id int64) (*User, error) {
+func GetUser(Id int64) (User, error) {
 	db := database.GetDB()
 	var getUser User
 	result := db.Where("ID=?", Id).Find(&getUser)
-	return &getUser, result.Error
+	return getUser, result.Error
 }
 
 func ToggleFavorite(userId int64, movieId int64) (Favorite, error) {
 	db := database.GetDB()
-	var getUser User
-	var getMovie Movie
-	db.Where("ID=?", userId).Find(&getUser)
-	db.Where("ID=?", movieId).Find(&getMovie)
-	favorite := Favorite{}
-	favorite.UserID = getUser.ID
-	favorite.MovieID = getMovie.ID
-	favorite.Movie = getMovie
-	result := db.Create(&favorite)
-	return favorite, result.Error
+	var user User
+	var movie Movie
 
+	movie, _ = GetMovieById(movieId)
+	user, _ = GetUser(userId)
+
+	fmt.Print(movie, "found movie")
+	fmt.Println(user, "found user")
+
+	favorite := Favorite{}
+	favorite.UserID = user.ID
+	favorite.MovieID = movie.ID
+	favorite.Movie = movie
+
+	var findFavorite Favorite
+	findFavorite, err := FindFavorite(userId, movieId)
+
+	fmt.Println(findFavorite, "found favorite")
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		result := db.Create(&favorite)
+		return favorite, result.Error
+	} else if err == nil {
+		DeleteFavorite(userId, movieId)
+		return findFavorite, nil
+	}
+	return findFavorite, err
+}
+
+func ShowFavorites(userId int64) []Favorite {
+	db := database.GetDB()
+	var favorites []Favorite
+	// db.Model(&user).Association("Favorites").Find(&favorites)
+	db.Where("user_id= ?", userId).Find(&favorites)
+	return favorites
 }
