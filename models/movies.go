@@ -10,13 +10,14 @@ import (
 
 type Movie struct {
 	gorm.Model
-	Title       string    `json:"title" validate:"required" gorm:"unique"`
-	Year        time.Time `json:"year" validate:"required" gorm:"type:datetime"`
-	Rating      float32   `json:"rating" gorm:"default: 0.0"`
-	Url         string    `json:"url" validate:"required"`
-	Description string    `json:"description" validate:"required"`
-	Type        string    `json:"type" validate:"required"`
-	PosterURL   string    `json:"posterURL"`
+	Title string `json:"title" validate:"required" gorm:"unique"`
+	// Released   time.Time `json:"released" validate:"required" gorm:"type:datetime"`
+	Released   string  `json:"released" validate:"required"`
+	Genre      string  `json:"genre"`
+	Type       string  `json:"type" validate:"required"`
+	Plot       string  `json:"plot" validate:"required"`
+	Poster     string  `json:"poster"`
+	ImdbRating float32 `json:"rating" gorm:"default: 0.0"`
 }
 
 func CreateMovie(movie Movie) error {
@@ -44,11 +45,24 @@ func GetMovieById(Id int64) (Movie, error) {
 	return movie, result.Error
 }
 
-func GetMovieByTitle(name string) (*Movie, *gorm.DB) {
+func GetMovieByTitle(name string) ([]Movie, *gorm.DB) {
 	db := database.GetDB()
-	var getMovie Movie
-	db.Where("Title=?", name).Find(&getMovie)
-	return &getMovie, db
+	var getMovie []Movie
+	// db.Where("Title=?", name).Find(&getMovie)
+	db.Where("Title LIKE ?", "%"+name+"%")
+	return getMovie, db
+}
+
+func FindMoviesByYear(title string, year string) ([]Movie, error) {
+	db := database.GetDB()
+	var movies []Movie
+	// datestring := "2022-08-01T15:37:46.811433349+05:30"
+	// year = year + "-01" + "-01"
+	// startYear, _ := time.Parse(year, datestring)
+	// fmt.Println(year, startYear)
+	// result := db.Where("Title LIKE ? AND year ", "%"+title+"%").Where("year >= ? AND year <= ?", ).Find(&movies)
+	result := db.Where("Title LIKE ? AND released LIKE ?", "%"+title+"%", "%"+year+"%").Find(&movies)
+	return movies, result.Error
 }
 
 func DeleteMovie(Id int64) Movie {
@@ -68,12 +82,12 @@ func UpdateMovie(Id int64, movie Movie) (Movie, error) {
 
 	if result.Error == nil {
 		getMovie.Title = movie.Title
-		getMovie.Description = movie.Description
-		getMovie.Rating = movie.Rating
-		getMovie.Url = movie.Url
-		getMovie.PosterURL = movie.PosterURL
+		getMovie.Plot = movie.Plot
+		getMovie.ImdbRating = movie.ImdbRating
+		getMovie.Poster = movie.Poster
+		getMovie.Genre = movie.Genre
 		getMovie.Type = movie.Type
-		getMovie.Year = movie.Year
+		getMovie.Released = movie.Released
 		getMovie.UpdatedAt = time.Now()
 		db.Save(&getMovie)
 		fmt.Print(getMovie, "record after update")

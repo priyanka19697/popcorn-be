@@ -38,7 +38,6 @@ func GetUser(Id int64) (User, error) {
 }
 
 func ToggleFavorite(userId int64, movieId int64) (Favorite, error) {
-	db := database.GetDB()
 	var user User
 	var movie Movie
 
@@ -57,12 +56,13 @@ func ToggleFavorite(userId int64, movieId int64) (Favorite, error) {
 	findFavorite, err := FindFavorite(userId, movieId)
 
 	fmt.Println(findFavorite, "found favorite")
+	fmt.Println(err, "found favorite")
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		result := db.Create(&favorite)
-		return favorite, result.Error
+		result, err1 := CreateFavorite(favorite)
+		return result, err1
 	} else if err == nil {
-		DeleteFavorite(userId, movieId)
+		findFavorite = DeleteFavorite(userId, movieId)
 		return findFavorite, nil
 	}
 	return findFavorite, err
@@ -72,6 +72,6 @@ func ShowFavorites(userId int64) []Favorite {
 	db := database.GetDB()
 	var favorites []Favorite
 	// db.Model(&user).Association("Favorites").Find(&favorites)
-	db.Where("user_id= ?", userId).Find(&favorites)
+	db.Where("user_id= ?", userId).Preload("Movie").Find(&favorites)
 	return favorites
 }

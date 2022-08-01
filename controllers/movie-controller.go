@@ -34,6 +34,7 @@ func GetMovieByTitle(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	movie := vars["movie"]
 	movieRecord, _ := models.GetMovieByTitle(movie)
+	fmt.Println(movieRecord)
 	res, _ := json.Marshal(movieRecord)
 	w.Header().Set("Content-Type", "pkglication/json")
 	w.WriteHeader(http.StatusOK)
@@ -59,6 +60,18 @@ func GetMovieById(w http.ResponseWriter, r *http.Request) {
 		movieResponse.Err = "nil"
 	}
 	res, _ := json.Marshal(movieResponse)
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+}
+
+func FindMoviesByYear(w http.ResponseWriter, r *http.Request) {
+	title := r.URL.Query().Get("t")
+	year := r.URL.Query().Get("y")
+	fmt.Println(title, year)
+	movies, _ := models.FindMoviesByYear(title, year)
+	fmt.Println(movies)
+	res, _ := json.Marshal(movies)
+	w.Header().Set("Content-Type", "pkglication/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 }
