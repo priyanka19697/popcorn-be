@@ -65,9 +65,13 @@ func GetMovieById(w http.ResponseWriter, r *http.Request) {
 }
 
 func FindMoviesByYear(w http.ResponseWriter, r *http.Request) {
-	title := r.URL.Query().Get("t")
-	year := r.URL.Query().Get("y")
-	fmt.Println(title, year)
+	title := r.URL.Query().Get("title")
+	year := r.URL.Query().Get("year")
+	// recordType := r.URL.Query().Get("recordtype")
+	// fmt.Printf(recordType, "recordtype")
+	// if recordType == "" {
+	// 	recordType = "all"
+	// }
 	movies, _ := models.FindMoviesByYear(title, year)
 	fmt.Println(movies)
 	res, _ := json.Marshal(movies)

@@ -61,8 +61,14 @@ func FindMoviesByYear(title string, year string) ([]Movie, error) {
 	// startYear, _ := time.Parse(year, datestring)
 	// fmt.Println(year, startYear)
 	// result := db.Where("Title LIKE ? AND year ", "%"+title+"%").Where("year >= ? AND year <= ?", ).Find(&movies)
+	// if recordType == "all" {
+	// 	result := db.Where("Title LIKE ? AND released LIKE ? AND type = ?", "%"+title+"%", "%"+year+"%", "%"+recordType+"%").Find(&movies)
+	// 	return movies, result.Error
+	// } else {
 	result := db.Where("Title LIKE ? AND released LIKE ?", "%"+title+"%", "%"+year+"%").Find(&movies)
 	return movies, result.Error
+
+	// }
 }
 
 func DeleteMovie(Id int64) Movie {
