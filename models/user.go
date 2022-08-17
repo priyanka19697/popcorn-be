@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/jinzhu/gorm"
 	"github.com/priyanka19697/popcorn-be/database"
@@ -37,35 +36,28 @@ func GetUser(Id int64) (User, error) {
 	return getUser, result.Error
 }
 
-func ToggleFavorite(userId int64, movieId int64) (Favorite, error) {
+func ToggleFavorite(userId int64, movieId int64) []Favorite {
 	var user User
 	var movie Movie
 
 	movie, _ = GetMovieById(movieId)
 	user, _ = GetUser(userId)
 
-	fmt.Print(movie, "found movie")
-	fmt.Println(user, "found user")
-
 	favorite := Favorite{}
 	favorite.UserID = user.ID
 	favorite.MovieID = movie.ID
 	favorite.Movie = movie
 
-	var findFavorite Favorite
-	findFavorite, err := FindFavorite(userId, movieId)
-
-	fmt.Println(findFavorite, "found favorite")
-	fmt.Println(err, "found favorite")
+	_, err := FindFavorite(userId, movieId)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		result, err1 := CreateFavorite(favorite)
-		return result, err1
+		CreateFavorite(favorite)
+
 	} else if err == nil {
-		findFavorite = DeleteFavorite(userId, movieId)
-		return findFavorite, nil
+		DeleteFavorite(userId, movieId)
 	}
-	return findFavorite, err
+	result := ShowFavorites(userId)
+	return result
 }
 
 func ShowFavorites(userId int64) []Favorite {

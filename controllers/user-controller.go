@@ -155,14 +155,14 @@ func ToggleFavorite(w http.ResponseWriter, r *http.Request) {
 	if userErr != nil || movieErr != nil {
 		fmt.Print("Error parsing id values")
 	}
-	favorite, favoriteError := models.ToggleFavorite(userID, movieID)
+	favorites := models.ToggleFavorite(userID, movieID)
 
-	if favoriteError != nil {
-		userResponse.Err = favoriteError.Error()
-	} else {
-		userResponse.Data = favorite
-		userResponse.Err = "nil"
-	}
+	// if favoriteError != nil {
+	// 	userResponse.Err = favoriteError.Error()
+	// } else {
+	userResponse.Data = favorites
+	// userResponse.Err = "nil"
+	// }
 	res, _ := json.Marshal(userResponse)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
